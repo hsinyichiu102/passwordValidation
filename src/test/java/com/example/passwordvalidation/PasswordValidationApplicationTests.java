@@ -19,6 +19,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * this test is the integration test via MockMVC
+ */
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -43,6 +46,9 @@ public class PasswordValidationApplicationTests {
         JSONObject request = new JSONObject();
         request.put("password","123123");
 
+        JSONObject response = new JSONObject();
+        response.put(Constants.checkPwd,Constants.pwdInvalid);
+
         RequestBuilder requestBuilder =
                 MockMvcRequestBuilders
                         .post("/signin")
@@ -51,8 +57,7 @@ public class PasswordValidationApplicationTests {
 
         mock.perform(requestBuilder)
                 .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().string(Constants.pwdInvalid))
+                .andExpect(content().string(response.toString()))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE));
 
     }
@@ -62,6 +67,8 @@ public class PasswordValidationApplicationTests {
 
         JSONObject request = new JSONObject();
         request.put("password","absabs");
+        JSONObject response = new JSONObject();
+        response.put(Constants.checkPwd,Constants.pwdInvalid);
 
         RequestBuilder requestBuilder =
                 MockMvcRequestBuilders
@@ -71,8 +78,7 @@ public class PasswordValidationApplicationTests {
 
         mock.perform(requestBuilder)
                 .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().string(Constants.pwdInvalid))
+                .andExpect(content().string(response.toString()))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE));
 
     }
@@ -83,6 +89,9 @@ public class PasswordValidationApplicationTests {
         JSONObject request = new JSONObject();
         request.put("password","absabs123123");
 
+        JSONObject response = new JSONObject();
+        response.put(Constants.checkPwd,Constants.pwdInvalid);
+
         RequestBuilder requestBuilder =
                 MockMvcRequestBuilders
                         .post("/signin")
@@ -91,8 +100,7 @@ public class PasswordValidationApplicationTests {
 
         mock.perform(requestBuilder)
                 .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().string(Constants.pwdStrInvalid))
+                .andExpect(content().string(response.toString()))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE));
 
     }
@@ -103,6 +111,9 @@ public class PasswordValidationApplicationTests {
         JSONObject request = new JSONObject();
         request.put("password","abs123123abs");
 
+        JSONObject response = new JSONObject();
+        response.put(Constants.checkPwd,Constants.pwdInvalid);
+
         RequestBuilder requestBuilder =
                 MockMvcRequestBuilders
                         .post("/signin")
@@ -111,10 +122,8 @@ public class PasswordValidationApplicationTests {
 
         mock.perform(requestBuilder)
                 .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().string(Constants.pwdStrInvalid))
+                .andExpect(content().string(response.toString()))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE));
-
     }
     @Test
     public void testSameSeq3() throws Exception{
@@ -122,6 +131,9 @@ public class PasswordValidationApplicationTests {
         JSONObject request = new JSONObject();
         request.put("password","ab123123");
 
+        JSONObject response = new JSONObject();
+        response.put(Constants.checkPwd,Constants.pwdInvalid);
+
         RequestBuilder requestBuilder =
                 MockMvcRequestBuilders
                         .post("/signin")
@@ -130,8 +142,7 @@ public class PasswordValidationApplicationTests {
 
         mock.perform(requestBuilder)
                 .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().string(Constants.pwdStrInvalid))
+                .andExpect(content().string(response.toString()))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE));
 
     }
@@ -142,6 +153,9 @@ public class PasswordValidationApplicationTests {
         JSONObject request = new JSONObject();
         request.put("password","123a123");
 
+        JSONObject response = new JSONObject();
+        response.put(Constants.checkPwd,Constants.pwdValid);
+
         RequestBuilder requestBuilder =
                 MockMvcRequestBuilders
                         .post("/signin")
@@ -150,10 +164,120 @@ public class PasswordValidationApplicationTests {
 
         mock.perform(requestBuilder)
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(content().string(Constants.pwdValid))
+                .andExpect(content().string(response.toString()))
                 .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE));
 
     }
 
+    @Test
+    public void empty() throws Exception{
+
+        JSONObject request = new JSONObject();
+        request.put("password","");
+
+        JSONObject response = new JSONObject();
+        response.put(Constants.checkPwd,Constants.pwdInvalid);
+
+        RequestBuilder requestBuilder =
+                MockMvcRequestBuilders
+                        .post("/signin")
+                        .headers(httpHeaders)
+                        .content(request.toString());
+
+        mock.perform(requestBuilder)
+                .andDo(print())
+                .andExpect(content().string(response.toString()))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE));
+
+    }
+
+
+    @Test
+    public void testShortLen() throws Exception{
+
+        JSONObject request = new JSONObject();
+        request.put("password","a123");
+
+        JSONObject response = new JSONObject();
+        response.put(Constants.checkPwd,Constants.pwdInvalid);
+
+        RequestBuilder requestBuilder =
+                MockMvcRequestBuilders
+                        .post("/signin")
+                        .headers(httpHeaders)
+                        .content(request.toString());
+
+        mock.perform(requestBuilder)
+                .andDo(print())
+                .andExpect(content().string(response.toString()))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE));
+
+    }
+
+    @Test
+    public void testLontLen() throws Exception{
+
+        JSONObject request = new JSONObject();
+        request.put("password","a1234567890da2wf");
+
+        JSONObject response = new JSONObject();
+        response.put(Constants.checkPwd,Constants.pwdInvalid);
+
+        RequestBuilder requestBuilder =
+                MockMvcRequestBuilders
+                        .post("/signin")
+                        .headers(httpHeaders)
+                        .content(request.toString());
+
+        mock.perform(requestBuilder)
+                .andDo(print())
+                .andExpect(content().string(response.toString()))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE));
+
+    }
+
+    @Test
+    public void testCapital() throws Exception{
+
+        JSONObject request = new JSONObject();
+        request.put("password","a123456A");
+
+        JSONObject response = new JSONObject();
+        response.put(Constants.checkPwd,Constants.pwdInvalid);
+
+        RequestBuilder requestBuilder =
+                MockMvcRequestBuilders
+                        .post("/signin")
+                        .headers(httpHeaders)
+                        .content(request.toString());
+
+        mock.perform(requestBuilder)
+                .andDo(print())
+                .andExpect(content().string(response.toString()))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE));
+
+    }
+
+
+    @Test
+    public void testSpeChar() throws Exception{
+
+        JSONObject request = new JSONObject();
+        request.put("password","a123456%#");
+
+        JSONObject response = new JSONObject();
+        response.put(Constants.checkPwd,Constants.pwdInvalid);
+
+        RequestBuilder requestBuilder =
+                MockMvcRequestBuilders
+                        .post("/signin")
+                        .headers(httpHeaders)
+                        .content(request.toString());
+
+        mock.perform(requestBuilder)
+                .andDo(print())
+                .andExpect(content().string(response.toString()))
+                .andExpect(header().string(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_UTF8_VALUE));
+
+    }
 }
