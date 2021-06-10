@@ -1,76 +1,116 @@
 package com.example.passwordvalidation;
 
-import com.example.passwordvalidation.service.ValidateService;
+import com.example.passwordvalidation.entity.UserInfo;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 
+import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.validation.ConstraintViolation;
 
-/**
- * a simple junit unit test to ensure the class validationService works
- */
+import javax.validation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static org.junit.Assert.*;
+
+@Import(ValidationAutoConfiguration.class)
+@RunWith(SpringRunner.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class PasswordValidationUnitTest {
 
-    ValidateService service= new ValidateService();
 
-    @Test
-    public void testDuplicateDigit(){
-        assertFalse(service.validatePwd("123123"));
+    private static Validator validator;
+    String isEmpty="{pwd.isEmpty}";
+    String pwd_length="{pwd.length}";
+    String pwd_oneEach= "{pwd.oneEach}";
+    String pwd_DigitAndLetter ="{pwd.DigitAndLetter}";
+    String pwd_Seq="{pwd.Seq}";
+
+
+    @Before
+    public void setUp() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
     }
 
+    /**
+     *
+     */
     @Test
-    public void testDuplicateAlpha(){
-        assertFalse(service.validatePwd("absabs"));
-    }
+    public void testInvalid() {
+        UserInfo usr = new UserInfo("test","123123");
+        Set<ConstraintViolation<UserInfo>> violations = validator.validate(usr);
+        List<String> error = new ArrayList<>();
+        for (ConstraintViolation cv : violations) {
+            /*System.out.println("ValidatationConstraint_getAnnotation: " + cv.getConstraintDescriptor().getAnnotation());
+            System.out.println("ValidatationConstraint_getConstraintDescriptor: " + cv.getConstraintDescriptor());
+            System.out.println("ValidatationConstraint_getMessageTemplate: " + cv.getMessageTemplate());
+            System.out.println("ValidatationConstraint_getInvalidValue: " + cv.getInvalidValue());
+            System.out.println("ValidatationConstraint_getLeafBean: " + cv.getLeafBean());
+            System.out.println("ValidatationConstraint_getRootBeanClass: " + cv.getRootBeanClass());
+            System.out.println("ValidatationConstraint_getPropertyPath().toString: " + cv.getPropertyPath().toString());*/
+            System.out.println("ValidatationConstraint_getMessage: " + cv.getMessage());
+            error.add(cv.getMessageTemplate());
+        }
+        assertTrue(!error.isEmpty());
+        assertTrue(error.contains(pwd_Seq));
+        assertTrue(error.contains(pwd_oneEach));
 
+        usr = new UserInfo("test","123123a");
+        violations=validator.validate(usr);
+        error = new ArrayList<>();
+        for (ConstraintViolation cv : violations) {
+            error.add(cv.getMessageTemplate());
+        }
+        assertTrue(!error.isEmpty());
+        assertTrue(error.contains(pwd_Seq));
+
+
+        usr = new UserInfo("test","asd");
+        violations=validator.validate(usr);
+        error = new ArrayList<>();
+        for (ConstraintViolation cv : violations) {
+            error.add(cv.getMessageTemplate());
+        }
+        assertTrue(!error.isEmpty());
+        assertTrue(error.contains(pwd_length));
+
+        usr = new UserInfo("test","asdAD123");
+        violations=validator.validate(usr);
+        error = new ArrayList<>();
+        for (ConstraintViolation cv : violations) {
+            error.add(cv.getMessageTemplate());
+        }
+        assertTrue(!error.isEmpty());
+        assertTrue(error.contains(pwd_DigitAndLetter));
+
+        usr = new UserInfo("test","");
+        violations=validator.validate(usr);
+        error = new ArrayList<>();
+        for (ConstraintViolation cv : violations) {
+            error.add(cv.getMessageTemplate());
+        }
+        assertTrue(!error.isEmpty());
+        assertTrue(error.contains(isEmpty));
+    }
     @Test
-    public void testSameSeq1(){
-        assertFalse(service.validatePwd("abc123123"));
+    public void testValid() {
+        UserInfo usr = new UserInfo("test","123a123");
+        Set<ConstraintViolation<UserInfo>> violations = validator.validate(usr);
+        List<String> error = new ArrayList<>();
+        for (ConstraintViolation cv : violations) {
+            error.add(cv.getMessageTemplate());
+        }
+        assertTrue(error.isEmpty());
     }
-
-    @Test
-    public void testSameSeq2(){
-        assertFalse(service.validatePwd("123abcabc"));
-    }
-
-    @Test
-    public void testSameSeq3(){
-        assertFalse(service.validatePwd("abc123abcabc"));
-    }
-
-    @Test
-    public void testCapital(){
-        assertFalse(service.validatePwd("123Abc"));
-    }
-
-    @Test
-    public void testEmpty(){
-        assertFalse(service.validatePwd(""));
-    }
-
-    @Test
-    public void testSuccess(){
-        assertTrue(service.validatePwd("123a123"));
-    }
-
-    @Test
-    public void shortLen(){
-        assertFalse(service.validatePwd("a123"));
-    }
-
-    @Test
-    public void LonLen(){
-        assertFalse(service.validatePwd("a123asd123wffae121s3f"));
-    }
-
-    @Test
-    public void specialChar(){
-        assertFalse(service.validatePwd("a123a$@"));
-    }
-
-
 
 }

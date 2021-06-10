@@ -1,25 +1,42 @@
 package com.example.passwordvalidation.entity;
 
-public class UserInfo {
-    private String password;
+import com.example.passwordvalidation.annotation.Password;
 
-    public String getPassword() {
-        return password;
-    }
 
-    public void setPassword(String password) {
+
+import lombok.Data;
+import lombok.Getter;
+
+import lombok.Setter;
+
+import java.io.Serializable;
+
+@Getter
+@Setter
+@Data
+public class UserInfo implements Serializable{
+
+    public UserInfo(String usrName, String password) {
+        this.usrName = usrName;
         this.password = password;
     }
-
-    public String getUsrName() {
-        return usrName;
-    }
-
-    public void setUsrName(String usrName) {
-        this.usrName = usrName;
-    }
+    public UserInfo(){}
 
     private String usrName;
+
+
+
+    @Password
+    private String password;
+
+
+    @Override
+    public String toString() {
+        return "UserInfo{" +
+                ", password='" + password + '\'' +
+                ", usrName='" + usrName + '\'' +
+                '}';
+    }
 
 
 }

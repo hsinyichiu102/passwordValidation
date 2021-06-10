@@ -1,42 +1,41 @@
 package com.example.passwordvalidation.controller;
 
-import com.example.passwordvalidation.constants.Constants;
 import com.example.passwordvalidation.entity.UserInfo;
-import com.example.passwordvalidation.service.ValidateService;
-
+import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @RestController
-@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class ValidateController {
 
-    @Autowired
-    ValidateService validate;
 
-    /**
-     * the controller to get the user's information and check if the password is valid
-     * @param request contains user's information
-     * @return a json string
-     */
     @RequestMapping(value = "/signin",method = RequestMethod.POST)
-    public String singIn(@RequestBody UserInfo request) {
-        UserInfo usr = new UserInfo();
+    public String singIn(@Valid @RequestBody UserInfo user, BindingResult result) {
         JSONObject obj = new JSONObject();
-        try {
-            usr.setPassword(request.getPassword());
-            if(validate.validatePwd(usr.getPassword())){
-                obj.put(Constants.checkPwd,Constants.pwdValid);
+        try{
+            if(result.hasErrors()){
+                List<String> err= new ArrayList<>();
+                List<ObjectError> ls=result.getAllErrors();
+                for (int i = 0; i < ls.size(); i++) {
+                    err.add(ls.get(i).getDefaultMessage());
+                }
+                obj.put("message",err);
+            }else{
+                obj.put("message","valid");
             }
-            else{
-                obj.put(Constants.checkPwd,Constants.pwdInvalid);
-            }
-        }catch (Exception e){
-           e.printStackTrace();
+        }catch (JSONException e){
+            obj.put("message",e.getMessage());
         }
         return obj.toString();
     }
+
 }
