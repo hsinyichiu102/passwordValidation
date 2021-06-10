@@ -17,6 +17,13 @@ import java.util.List;
 @RequestMapping(produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 public class ValidateController {
 
+    /**
+     * handle request to /signin endpoint
+     * @param user contains the userName and password
+     * @param result contains the result after validated
+     * @return json string to presenting whether or not the password is valid,
+     *  and what the results of the checks were
+     */
 
     @RequestMapping(value = "/signin",method = RequestMethod.POST)
     public String singIn(@Valid @RequestBody UserInfo user, BindingResult result) {
